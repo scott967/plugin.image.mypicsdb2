@@ -295,11 +295,11 @@ class Main:
 
                 liz.setInfo(type="pictures", infoLabels=infolabels)
 
-            liz.setLabel(picname+" "+suffix)
+            liz.setLabel(f"{picname} {suffix}")
 
-            if fanart is not None and bool(fanart) is not False:
+            if fanart is not None and fanart:
                 liz.setProperty('fanart_image', fanart)
-                liz.setArt({'fanart': fanart, 'thumb': fanart})
+                liz.setArt({'fanart': fanart, 'thumb': fanart, 'icon': fanart})
 
             # if contextmenu:
             #    if coords:
@@ -601,6 +601,7 @@ class Main:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE)
         xbmcplugin.addSortMethod(
             int(sys.argv[1]), xbmcplugin.SORT_METHOD_PROGRAM_COUNT)
+        xbmcplugin.setContent(int(sys.argv[1]), 'images')
 
         self.change_view()
 
