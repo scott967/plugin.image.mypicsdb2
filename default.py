@@ -265,7 +265,7 @@ class Main:
                                   suffix, "date": date, "count": count}
 
                 try:
-                    if exiftime != None and exiftime != "0":
+                    if exiftime is not None and exiftime != "0":
                         common.log("Main.add_picture",
                                    f"Picture has EXIF Date/Time {exiftime}")
                         infolabels["exif:exiftime"] = exiftime
@@ -2099,6 +2099,7 @@ class Main:
             int(sys.argv[1]), xbmcplugin.SORT_METHOD_PROGRAM_COUNT)
         xbmcplugin.addSortMethod(
             int(sys.argv[1]), xbmcplugin.SORT_METHOD_LABEL)
+        xbmcplugin.setContent(int(sys.argv[1]), 'images')
 
         self.change_view()
 
