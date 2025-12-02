@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*-
 
-""" 
+"""
 Copyright (C) 2012 Xycl
 
 This program is free software: you can redistribute it and/or modify
@@ -19,10 +19,14 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """
 
-import os, urllib
-import xbmc, xbmcvfs
-import json
 import datetime
+import json
+import os
+import urllib
+
+import xbmc
+import xbmcvfs
+
 import resources.lib.common as common
 
 
@@ -34,7 +38,7 @@ class Scanner(object):
         files_to_return = []
         dirs_to_return = []
 
-           
+
         if path.startswith('multipath://'):
             common.log("Scanner.walk", 'multipath "%s"'%path)
             dirs = path[12:-1].split('/')
@@ -44,8 +48,8 @@ class Scanner(object):
                 for dirname in dirnames1:
                     dirnames.append(dirname)
                 for filename in filenames1:
-                    filenames.append(filename)               
-               
+                    filenames.append(filename)
+
         else:
             common.log("Scanner.walk", 'path "%s"'%path)
             dirnames, filenames = self._walk(path, recursive, types)
@@ -65,7 +69,7 @@ class Scanner(object):
         dirnames   = []
 
         path = xbmcvfs.translatePath(path)
-        common.log("Scanner._walk",'"%s"'%path)
+        #common.log("Scanner._walk",'"%s"'%path)
         #if xbmcvfs.exists(xbmcvfs.translatePath(path)) or re.match(r"[a-zA-Z]:\\", path) is not None:
         subdirs, files = self.listdir(path)
         for subdir in subdirs:
@@ -77,7 +81,7 @@ class Scanner(object):
                     filenames.append(os.path.join(path, filename))
                 else:
                     common.log("Scanner:_walk", 'Found file "%s" is excluded'%os.path.join(path, filename))
-            else:              
+            else:
                 filenames.append(os.path.join(path, filename))
 
 
@@ -88,7 +92,7 @@ class Scanner(object):
                     dirnames.append(item)
                 for item in filenames1:
                     filenames.append(item)
-        
+
         return dirnames, filenames
 
 
@@ -101,13 +105,13 @@ class Scanner(object):
 
     def delete(self, filename):
         xbmcvfs.delete(filename)
-        
-        
-        
+
+
+
     def getlocalfile(self, filename):
-        
+
         filename = common.smart_unicode(filename)
-        
+
         # Windows NEEDS unicode but OpenElec utf-8
         try:
             exists = os.path.exists(filename)
@@ -134,8 +138,8 @@ class Scanner(object):
             pass
         return filedatetime
 
-    
-    
+
+
     def listdir(self, path):
 
         try:
@@ -156,9 +160,9 @@ class Scanner(object):
                             dir_list.append(filename)
                         else:
                             file_list.append(filename)
-                            
+
             except Exception as msg:
                 common.log("Scanner.listdir", 'Path "%s"'%path, xbmc.LOGERROR )
                 common.log("Scanner.listdir", "%s - %s"%(Exception,msg), xbmc.LOGERROR )
-                
+
             return dir_list, file_list

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf8 -*-
 
-""" 
+"""
 New VFS scanner for MyPicsDB
 Copyright (C) 2012 Xycl
 
@@ -21,37 +21,30 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 __addonname__ = 'plugin.image.mypicsdb2'
 
-# xbmc modules
-import xbmc
-import resources.lib.common as common
-
 # python modules
 import mmap
 import optparse
 import os
-from urllib.parse import unquote_plus
-from traceback import print_exc
 from time import strftime, strptime
+from traceback import print_exc
+from urllib.parse import unquote_plus
 
-#local modules
-from resources.lib.pathscanner import Scanner
+# xbmc modules
+import xbmc
 
+import resources.lib.common as common
 import resources.lib.MypicsDB as MypicsDB
-
+#xbmc addons
+from resources.lib.local.dialogaddonscan.DialogAddonScan import AddonScan
+from resources.lib.parser.exif import __version__, exif_log
+from resources.lib.parser.exif import process_file as EXIF_file
+from resources.lib.parser.exif.tags import DEFAULT_STOP_TAG, FIELD_TYPES
 # local tag parsers
 from resources.lib.parser.iptc.iptcinfo import IPTCInfo
 from resources.lib.parser.iptc.iptcinfo import c_datasets as IPTC_FIELDS
-from resources.lib.parser.exif.tags import DEFAULT_STOP_TAG, FIELD_TYPES
-from resources.lib.parser.exif import exif_log, __version__
-from resources.lib.parser.exif import process_file as EXIF_file
-
 from resources.lib.parser.xmp.xmp import XMP_Tags
-
-
-
-#xbmc addons
-from resources.lib.local.dialogaddonscan.DialogAddonScan import AddonScan
-
+#local modules
+from resources.lib.pathscanner import Scanner
 
 
 class VFSScanner:
@@ -63,9 +56,9 @@ class VFSScanner:
         self.picture_extensions = []
         self.video_extensions   = []
         self.lists_separator = "||"
-        
+
         self.scan_is_cancelled = False
-        
+
         self.picsdeleted = 0
         self.picsupdated = 0
         self.picsadded   = 0
@@ -74,7 +67,7 @@ class VFSScanner:
         self.total_root_entries = 0
         self.totalfiles  = 0
         self.mpdb = MypicsDB.MyPictureDB()
-         
+
         for path,_,_,exclude in self.mpdb.get_all_root_folders():
             if exclude:
                 common.log("", 'Exclude path "%s" found '%path[:len(path)-1])
@@ -101,9 +94,9 @@ class VFSScanner:
             if common.getaddon_setting('scanning')=='false':
                 common.setaddon_setting("scanning", "true")
                 self.options = options
-                
+
                 common.log("VFSScanner.dispatcher", "dispatcher started", xbmc.LOGINFO)
-                
+
                 if self.options.rootpath:
                     self.options.rootpath = common.smart_utf8(unquote_plus( self.options.rootpath)).replace("\\\\", "\\").replace("\\\\", "\\").replace("\\'", "\'")
                     common.log("VFSScanner.dispatcher", 'Adding path "%s"'%self.options.rootpath, xbmc.LOGINFO)
@@ -115,11 +108,11 @@ class VFSScanner:
                     self.scan.update(0,0,
                                 common.getstring(30000)+" ["+common.getstring(30241)+"]",#MyPicture Database [preparing]
                                 common.getstring(30247))#please wait...
-                    
+
                     self._countfiles(self.options.rootpath)
                     self.total_root_entries = 1
                     self._addpath(self.options.rootpath, None, self.options.recursive, True)
-                    
+
                     self.scan.close()
 
                 elif self.options.database or self.options.refresh:
@@ -157,13 +150,13 @@ class VFSScanner:
                 self.picsdeleted += self.mpdb.del_pics_wo_sha(self.scan_is_cancelled)
 
                 common.log("VFSScanner.dispatcher", common.getstring(30248)%(self.picsscanned,self.picsadded,self.picsdeleted,self.picsupdated), xbmc.LOGINFO)
-                
+
                 if common.getaddon_setting('popupEndOfScan')=='true':
                     common.show_notification(common.getstring(30000), common.getstring(30248)%(self.picsscanned,self.picsadded,self.picsdeleted,self.picsupdated) )
 
                 common.setaddon_setting("scanning", "false")
-                
-            else:    
+
+            else:
                 common.log("VFSScanner.dispatcher", "dispatcher already running", xbmc.LOGINFO)
 
         except Exception as msg:
@@ -173,7 +166,7 @@ class VFSScanner:
     def _countfiles(self, path, reset = True, recursive = True):
         if reset:
             self.totalfiles = 0
-        
+
         common.log("VFSScanner._countfiles", 'path "%s"'%path)
         (_, files) = self.filescanner.walk(path, recursive, self.picture_extensions if self.use_videos == "false" else self.all_extensions)
         self.totalfiles += len(files)
@@ -189,12 +182,12 @@ class VFSScanner:
                 return False
 
         return True
-        
-        
-            
+
+
+
     def _addpath(self, path, parentfolderid, recursive, update):
 
-        common.log("VFSScanner._addpath", '"%s"'%path )
+        #common.log("VFSScanner._addpath", '"%s"'%path )
         # Check excluded paths
         if path in self.exclude_folders:
             common.log("VFSScanner._addpath", 'Path in exclude folder: "%s"'%path )
@@ -207,9 +200,9 @@ class VFSScanner:
         foldername = os.path.basename(path)
         if len(foldername)==0:
             foldername = os.path.split(os.path.dirname(path))[1]
-        
+
         folderid = self.mpdb.folder_insert(foldername, path, parentfolderid, 1 if len(filenames)>0 else 0 )
-        
+
         # get currently stored files for 'path' from database.
         # needed for 'added', 'updated' or 'deleted' decision
         filesfromdb = self.mpdb.listdir(common.smart_unicode(path))
@@ -221,22 +214,22 @@ class VFSScanner:
                     self.scan_is_cancelled = True
                     common.log( "VFSScanner._addpath", "Scanning canncelled", xbmc.LOGINFO)
                     return
-                    
+
                 if self._check_excluded_files(pic) == False:
                     continue
-                
+
                 self.picsscanned += 1
-                
+
                 filename = os.path.basename(pic)
                 extension = os.path.splitext(pic)[1].upper()
-                    
-        
+
+
                 # Use partial paths (sub directory names) as tags
                 partialPath = ''
                 check_path =  os.path.dirname(path)
                 while 1:
                     check_path, folder = os.path.split(check_path)
-                
+
                     if folder != "":
                         if len(partialPath) == 0:
                             partialPath = folder
@@ -247,9 +240,9 @@ class VFSScanner:
                             if len(partialPath) == 0:
                                 partialPath = check_path
                             else:
-                                partialPath = partialPath + '||' + check_path        
+                                partialPath = partialPath + '||' + check_path
                         break
-                
+
                 picentry = { "idFolder": folderid,
                              "strPath": path,
                              "strFilename": filename,
@@ -263,55 +256,55 @@ class VFSScanner:
 
                 sqlupdate = False
                 filesha   = 0
-                
+
                 # get the meta tags. but only for pictures and only if they are new or modified.
                 if extension in self.picture_extensions:
-                    
-                    common.log( "VFSScanner._addpath", 'Scanning picture "%s"'%common.smart_utf8(pic))
-                    
-                    
+
+                    #common.log( "VFSScanner._addpath", 'Scanning picture "%s"'%common.smart_utf8(pic))
+
+
                     if pic in filesfromdb: # then it's an update
-                        
+
                         filesfromdb.pop(filesfromdb.index(pic))
-                        
-                        if self.options.refresh == True: # this means that we only want to get new pictures.
+
+                        if self.options.refresh is True: # this means that we only want to get new pictures.
                                 if self.scan and self.totalfiles!=0 and self.total_root_entries!=0:
                                     self.scan.update(int(100*float(self.picsscanned)/float(self.totalfiles)),
                                                   int(100*float(self.current_root_entry)/float(self.total_root_entries)),
                                                   common.smart_utf8(common.getstring(30000)+" [%s] (%0.2f%%)"%(self.action,100*float(self.picsscanned)/float(self.totalfiles))),#"MyPicture Database [%s] (%0.2f%%)"
                                                   common.smart_utf8(filename))
-                                continue                            
-                        else: 
+                                continue
+                        else:
                             (localfile, isremote) = self.filescanner.getlocalfile(pic)
-                            
-                            filesha = self.mpdb.sha_of_file(localfile) 
+
+                            filesha = self.mpdb.sha_of_file(localfile)
                             sqlupdate   = True
-                            
+
                             if self.mpdb.stored_sha(path,filename) != filesha:  # picture was modified
 
                                 self.picsupdated += 1
-                                common.log( "VFSScanner._addpath", "Picture already exists and must be updated")
-                                
+                                common.log( "VFSScanner._addpath", f"{pic} Picture already exists and must be updated")
+
                                 tags = self._get_metas(localfile)
                                 picentry.update(tags)
-            
+
                                 # if isremote == True then the file was copied to cache directory.
                                 if isremote:
-                                    self.filescanner.delete(localfile)                            
-    
+                                    self.filescanner.delete(localfile)
+
                             else:
 
-                                common.log( "VFSScanner._addpath", "Picture already exists but not modified")
-    
+                                #common.log( "VFSScanner._addpath", "Picture already exists but not modified")
+
                                 if self.scan and self.totalfiles!=0 and self.total_root_entries!=0:
                                     self.scan.update(int(100*float(self.picsscanned)/float(self.totalfiles)),
                                                   int(100*float(self.current_root_entry)/float(self.total_root_entries)),
                                                   common.smart_utf8(common.getstring(30000)+" [%s] (%0.2f%%)"%(self.action,100*float(self.picsscanned)/float(self.totalfiles))),#"MyPicture Database [%s] (%0.2f%%)"
                                                   filename)
-    
+
                                 if isremote:
-                                    self.filescanner.delete(localfile)                            
-    
+                                    self.filescanner.delete(localfile)
+
                                 continue
 
                     else: # it's a new picture
@@ -332,7 +325,7 @@ class VFSScanner:
                 # videos aren't scanned and therefore never updated
                 elif extension in self.video_extensions:
                     common.log( "VFSScanner._addpath", 'Adding video file "%s"'%pic)
-                    
+
                     if pic in filesfromdb:  # then it's an update
                         sqlupdate   = True
                         filesfromdb.pop(filesfromdb.index(pic))
@@ -367,12 +360,12 @@ class VFSScanner:
                                   int(100*float(self.current_root_entry)/float(self.total_root_entries)),
                                   common.getstring(30000)+" [%s] (%0.2f%%)"%(self.action,100*float(self.picsscanned)/float(self.totalfiles)),#"MyPicture Database [%s] (%0.2f%%)"
                                   filename)
-                
+
         if self.scan.iscanceled():
             common.log( "VFSScanner._addpath", "Scanning canncelled", xbmc.LOGINFO)
             self.scan_is_cancelled = True
-            return                
-        
+            return
+
         # all pics left in list filesfromdb weren't found in file system.
         # therefore delete them from db
         if filesfromdb and self.options.refresh != True:
@@ -388,7 +381,7 @@ class VFSScanner:
                     self.scan_is_cancelled = True
                     return
                 self._addpath(dirname, folderid, True, update)
-                
+
 
 
     def _get_metas(self, fullpath):
@@ -403,7 +396,7 @@ class VFSScanner:
                 common.log( "VFSScanner._get_metas()._get_exif()", 'Reading EXIF tags from "%s"'%fullpath)
                 exif = self._get_exif(fullpath)
                 picentry.update(exif)
-                    
+
                 common.log( "VFSScanner._get_metas()._get_exif()", "Finished reading EXIF tags")
             except Exception as msg:
                 common.log( "VFSScanner._get_metas()._get_exif()", "Exception", xbmc.LOGERROR)
@@ -417,7 +410,7 @@ class VFSScanner:
                 common.log( "VFSScanner._get_metas()._get_iptc()", 'Reading IPTC tags from "%s"'%fullpath)
                 iptc = self._get_iptc(fullpath)
                 picentry.update(iptc)
-                
+
                 common.log( "VFSScanner._get_metas()._get_iptc()", "Finished reading IPTC tags")
             except Exception as msg:
                 common.log( "VFSScanner._get_metas()_get_iptc()", "Exception", xbmc.LOGERROR)
@@ -452,16 +445,16 @@ class VFSScanner:
                     elif a >= 50:
                         new_rating = 3
                     elif a >= 25:
-                        new_rating = 2                        
+                        new_rating = 2
                     elif a >= 1:
-                        new_rating = 1                        
+                        new_rating = 1
                     else:
                         new_rating = 0
                     picentry['Image Rating'] = str(new_rating)
-                
+
             if 'Image Rating' not in picentry or picentry['Image Rating'] is None or len(picentry['Image Rating']) == 0:
                 picentry['Image Rating'] = "0"
-            
+
         return picentry
 
 
@@ -500,12 +493,12 @@ class VFSScanner:
         tags = EXIF_file(f, details=False)
         if not tags:
             common.log( "VFSScanner._get_exif()", 'No tags found in "%s"'%picfile)
-                                           
+
         f.close()
 
         picentry={}
-        
-    
+
+
         for tag in EXIF_fields:
             if tag in tags.keys():
                 if tag in ["EXIF DateTimeOriginal","EXIF DateTimeDigitized","Image DateTime"]:
@@ -522,14 +515,14 @@ class VFSScanner:
 
                 else:
                     tagvalue = tags[tag].__str__()
-                    
+
                 try:
                     picentry[tag]=tagvalue
                     common.log( "VFSScanner._get_exif()", tag + ' ' + tagvalue)
                 except Exception as msg:
                     common.log("VFSScanner._get_exif",  picfile , xbmc.LOGERROR)
                     common.log("VFSScanner._get_exif",  "%s - %s"%(Exception,msg), xbmc.LOGERROR )
-                    
+
         if "Image Rating" not in picentry:
             picentry["Image Rating"] = ""
         return picentry
@@ -548,7 +541,7 @@ class VFSScanner:
         #except Exception as msg:
         #    common.log("VFSScanner._get_xmp", 'Error reading XMP tags for "%s"'%(fullpath), xbmc.LOGERROR)
         #    common.log("VFSScanner._get_xmp",  "%s - %s"%(Exception,msg), xbmc.LOGERROR )
-        
+
         return tags
 
 
@@ -582,7 +575,7 @@ class VFSScanner:
                         if isinstance(info._data[k],str):
                             iptc[IPTC_FIELDS[k]] = info._data[k]
                         if isinstance(info._data[k],bytes):
-                            iptc[IPTC_FIELDS[k]] = str(info._data[k], "utf-8")  
+                            iptc[IPTC_FIELDS[k]] = str(info._data[k], "utf-8")
                         elif isinstance(info._data[k],list):
                             iptc[IPTC_FIELDS[k]] = self.lists_separator.join([str(i, 'utf-8') for i in info._data[k]])
                         else:
