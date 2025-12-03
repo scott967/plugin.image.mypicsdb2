@@ -219,7 +219,7 @@ class Main:
         extension = splitext(picname)[1].upper()
         try:
             fullfilepath = join(picpath, picname)
-            common.log("Main.add_picture", f"Name = {fullfilepath}")
+            #common.log("Main.add_picture", f"Name = {fullfilepath}")
 
             liz = xbmcgui.ListItem(picname, info, offscreen=True)
 
@@ -266,7 +266,7 @@ class Main:
 
                 try:
                     if exiftime is not None and exiftime != "0":
-                        common.log("Main.add_picture",
+                        #common.log("Main.add_picture",
                                    f"Picture has EXIF Date/Time {exiftime}")
                         infolabels["exif:exiftime"] = exiftime
                 except:
