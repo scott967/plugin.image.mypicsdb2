@@ -1061,7 +1061,7 @@ class Main:
             min_rating = 0
 
         if not self.args.searchterm:
-            refresh = 0
+            refresh = False
             filters = MPDB.search_list_saved()
             dialog = xbmcgui.Dialog()
 
@@ -1098,7 +1098,7 @@ class Main:
         else:
             motrecherche = self.args.searchterm
             common.log("Main.global_search", "search %s" % motrecherche)
-            refresh = 1
+            refresh = True
 
         listtags = [k for k in MPDB.list_tagtypes_count(min_rating)]
 
