@@ -221,7 +221,8 @@ class Main:
             fullfilepath = join(picpath, picname)
             #common.log("Main.add_picture", f"Name = {fullfilepath}")
 
-            liz = xbmcgui.ListItem(picname, info, offscreen=True)
+            #liz = xbmcgui.ListItem(picname, info, offscreen=True)
+            liz = xbmcgui.ListItem(label=picname, path=picpath, offscreen=True)
 
             try:
                 (exiftime, rating) = MPDB.get_pic_date_rating(picpath, picname)
@@ -267,7 +268,7 @@ class Main:
                 try:
                     if exiftime is not None and exiftime != "0":
                         #common.log("Main.add_picture",
-                                   f"Picture has EXIF Date/Time {exiftime}")
+                        #           f"Picture has EXIF Date/Time {exiftime}")
                         infolabels["exif:exiftime"] = exiftime
                 except:
                     pass
@@ -282,7 +283,7 @@ class Main:
                         resolutionY = resolutionXY[0][0]
 
                     if resolutionX != None and resolutionY != None and resolutionX != "0" and resolutionY != "0":
-                        common.log("Main.add_picture", f"Picture has resolution {resolutionX} x {resolutionY}")
+                        #common.log("Main.add_picture", f"Picture has resolution {resolutionX} x {resolutionY}")
                         infolabels["exif:resolution"] = str(
                             resolutionX) + ',' + str(resolutionY)
                 except:
@@ -293,7 +294,14 @@ class Main:
                     suffix = suffix + "[COLOR=C0FFFF00]"+(
                         "*"*int(rating))+"[/COLOR][COLOR=C0C0C0C0]"+("*"*(5-int(rating)))+"[/COLOR]"
 
-                liz.setInfo(type="pictures", infoLabels=infolabels)
+                #common.log("Main.add_picture", f"infolabels are: {infolabels}")
+                #liz.setInfo(type="pictures", infoLabels=infolabels)
+                pix_tag:xbmc.InfoTagPicture = liz.getPictureInfoTag(offscreen=True)
+                width,height = infolabels.get('exif:resolution', '0,0').split(',')
+                if width != '0':
+                    pix_tag.setResolution(int(width), int(height))
+                if infolabels.get('exif:time'):
+                    pix_tag.setDateTimeTaken(infolabels.get('exif:exiftime').replace(' ', 'T'))
 
             liz.setLabel(f"{picname} {suffix}")
 
