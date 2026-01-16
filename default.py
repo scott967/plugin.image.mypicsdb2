@@ -40,7 +40,7 @@ except Exception as e:
 # MikeBZH44: commoncache for MyPicsDB with 1 hour timeout
 try:
     import StorageServer
-except:
+except ImportError:
     import resources.lib.storageserverdummy as StorageServer
 
 # set variables used by other modules
