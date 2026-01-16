@@ -224,7 +224,8 @@ class Main:
             fullfilepath = join(picpath, picname)
             #common.log("Main.add_picture", f"Name = {fullfilepath}")
 
-            liz = xbmcgui.ListItem(picname, info)
+            #liz = xbmcgui.ListItem(picname, info, offscreen=True)
+            liz = xbmcgui.ListItem(label=picname, path=picpath, offscreen=True)
 
             try:
                 (exiftime, rating) = MPDB.get_pic_date_rating(picpath, picname)
@@ -270,7 +271,7 @@ class Main:
                 try:
                     if exiftime is not None and exiftime != "0":
                         #common.log("Main.add_picture",
-                                   #"Picture has EXIF Date/Time %s" % exiftime)
+                        #           f"Picture has EXIF Date/Time {exiftime}")
                         infolabels["exif:exiftime"] = exiftime
                 except:
                     pass
@@ -285,8 +286,7 @@ class Main:
                         resolutionY = resolutionXY[0][0]
 
                     if resolutionX != None and resolutionY != None and resolutionX != "0" and resolutionY != "0":
-                        #common.log("Main.add_picture", "Picture has resolution %s x %s" % (
-                            #str(resolutionX), str(resolutionY)))
+                        #common.log("Main.add_picture", f"Picture has resolution {resolutionX} x {resolutionY}")
                         infolabels["exif:resolution"] = str(
                             resolutionX) + ',' + str(resolutionY)
                 except:
@@ -299,12 +299,19 @@ class Main:
 
                 persons = MPDB.get_pic_persons(picpath, picname)
                 liz.setProperty('mypicsdb_person', persons)
-                liz.setInfo(type="pictures", infoLabels=infolabels)
+                #liz.setInfo(type="pictures", infoLabels=infolabels)
+                pix_tag:xbmc.InfoTagPicture = liz.getPictureInfoTag(offscreen=True)
+                width,height = infolabels.get('exif:resolution', '0,0').split(',')
+                if width != '0':
+                    pix_tag.setResolution(int(width), int(height))
+                if infolabels.get('exif:time'):
+                    pix_tag.setDateTimeTaken(infolabels.get('exif:exiftime').replace(' ', 'T'))
 
             liz.setLabel(f"{picname} {suffix}")
 
             if fanart is not None and fanart:
                 liz.setProperty('fanart_image', fanart)
+                liz.setArt({'fanart': fanart, 'thumb': fanart, 'icon': fanart})
 
             # if contextmenu:
             #    if coords:
@@ -435,6 +442,9 @@ class Main:
         action = "showdate"
         monthname = common.getstring(30006).split("|")
         fullmonthname = common.getstring(30008).split("|")
+        displaythisdate = ""
+        thisdateformat = ""
+        allperiod = ""
         if self.args.period == "year":
             common.log("Main.show_date", "period=year")
             listperiod = MPDB.get_years(min_rating)
@@ -608,6 +618,7 @@ class Main:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE)
         xbmcplugin.addSortMethod(
             int(sys.argv[1]), xbmcplugin.SORT_METHOD_PROGRAM_COUNT)
+        xbmcplugin.setContent(int(sys.argv[1]), 'images')
 
         self.change_view()
 
@@ -1067,7 +1078,7 @@ class Main:
             min_rating = 0
 
         if not self.args.searchterm:
-            refresh = 0
+            refresh = False
             filters = MPDB.search_list_saved()
             dialog = xbmcgui.Dialog()
 
@@ -1104,7 +1115,7 @@ class Main:
         else:
             motrecherche = self.args.searchterm
             common.log("Main.global_search", "search %s" % motrecherche)
-            refresh = 1
+            refresh = True
 
         listtags = [k for k in MPDB.list_tagtypes_count(min_rating)]
 
@@ -2103,6 +2114,7 @@ class Main:
             int(sys.argv[1]), xbmcplugin.SORT_METHOD_PROGRAM_COUNT)
         xbmcplugin.addSortMethod(
             int(sys.argv[1]), xbmcplugin.SORT_METHOD_LABEL)
+        xbmcplugin.setContent(int(sys.argv[1]), 'images')
 
         self.change_view()
 
