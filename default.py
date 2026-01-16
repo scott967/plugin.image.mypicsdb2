@@ -32,9 +32,9 @@ try:
     import json as simplejson
     # test json has not loads, call error
     if not hasattr(simplejson, "loads"):
-        raise Exception("Hmmm! Error with json %r" % dir(simplejson))
+        raise Exception(f"Hmmm! Error with json {dir(simplejson)!r}")
 except Exception as e:
-    print("[MyPicsDB] %s" % str(e))
+    print(f"[MyPicsDB] {str(e)}")
     import simplejson
 
 # MikeBZH44: commoncache for MyPicsDB with 1 hour timeout
@@ -83,11 +83,11 @@ class _Info:
         self.__dict__[key] = value
 
     def __str__(self):
-        return str(self.__class__) + '\n' + '\n'.join(('{} = {}'.format(item, self.__dict__[item]) for item in self.__dict__))
+        return str(self.__class__) + '\n' + '\n'.join((f'{item} = {self.__dict__[item]}' for item in self.__dict__))
 
     def output(self):
         common.log("_Info", str(self.__class__) + '\n' + '\n'.join(
-            ('{} = {}'.format(item, self.__dict__[item]) for item in self.__dict__)))
+            (f'{item} = {self.__dict__[item]}' for item in self.__dict__)))
 
 
 global MPDB
@@ -99,22 +99,21 @@ class Main:
         try:
             MPDB = MypicsDB.MyPictureDB()
         except Exception as msg:
-            common.log("Main.add_directory",  "%s - %s" %
-                       (Exception, str(msg)), xbmc.LOGERROR)
+            common.log("Main.add_directory",
+                       f"{Exception} - {str(msg)}", xbmc.LOGERROR)
             raise msg
 
     def get_args(self):
         common.log("Main.get_args",
                    "MyPicturesDB plugin called :", xbmc.LOGINFO)
         common.log("Main.get_args",
-                   "sys.argv[0] = %s" % sys.argv[0], xbmc.LOGINFO)
+                   f"sys.argv[0] = {sys.argv[0]}", xbmc.LOGINFO)
         common.log("Main.get_args",
-                   "sys.argv[2] = %s" % sys.argv[2], xbmc.LOGINFO)
+                   f"sys.argv[2] = {sys.argv[2]}", xbmc.LOGINFO)
 
         self.parm = common.smart_utf8(unquote(sys.argv[2])).replace(
             "\\\\", "\\")  # .replace("?&", "&")
-        common.log("Main.get_args", "self.parm] = %s" %
-                   self.parm, xbmc.LOGINFO)
+        common.log("Main.get_args", f"self.parm] = {self.parm}", xbmc.LOGINFO)
 
         # change for ruuk's plugin screensaver
         self.parm = self.parm.replace('&plugin_slideshow_ss=true', '')
@@ -126,7 +125,7 @@ class Main:
         sys.argv[2] = self.parm
         parm = self.cleanup(self.parm[1:])
 
-        args = "self.args = _Info(%s)" % (parm)
+        args = f"self.args = _Info({parm})"
 
         exec(args)
         # self.args.output()
@@ -167,8 +166,8 @@ class Main:
                 parameter = "&".join(
                     [param+"="+repr(common.quote_param(valeur)) for param, valeur in params])
             except Exception as msg:
-                common.log("Main.add_directory",  "%s - %s" %
-                           (Exception, str(msg)), xbmc.LOGERROR)
+                common.log("Main.add_directory",
+                           f"{Exception} - {str(msg)}", xbmc.LOGERROR)
                 parameter = ""
 
             u = sys.argv[0]+"?"+parameter+"&action=" + \
@@ -184,8 +183,8 @@ class Main:
             return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=True)
 
         except Exception as msg:
-            common.log("Main.add_directory",  "%s - %s" %
-                       (Exception, str(msg)), xbmc.LOGERROR)
+            common.log("Main.add_directory",
+                       f"{Exception} - {str(msg)}", xbmc.LOGERROR)
             pass
 
     def add_action(self, name, params, action, iconimage, fanart=None, contextmenu=None, total=0, info="*", replacemenu=True):
@@ -195,8 +194,8 @@ class Main:
                 parameter = "&".join(
                     [param+"="+repr(common.quote_param(valeur)) for param, valeur in params])
             except Exception as msg:
-                common.log("Main.add_action",  "%s - %s" %
-                           (Exception, str(msg)), xbmc.LOGERROR)
+                common.log("Main.add_action",
+                           f"{Exception} - {str(msg)}", xbmc.LOGERROR)
                 parameter = ""
 
             u = sys.argv[0]+"?"+parameter+"&action=" + \
@@ -211,8 +210,8 @@ class Main:
             # ,totalItems=total)
             return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=u, listitem=liz, isFolder=False)
         except Exception as msg:
-            common.log("Main.add_action",  "%s - %s" %
-                       (Exception, str(msg)), xbmc.LOGERROR)
+            common.log("Main.add_action",
+                       f"{Exception} - {str(msg)}", xbmc.LOGERROR)
             pass
 
     def add_picture(self, picname, picpath, count=0, info="*", fanart=None, contextmenu=None, replacemenu=True):
@@ -234,7 +233,7 @@ class Main:
                     date = exiftime and strftime("%d.%m.%Y", strptime(
                         exiftime, "%Y-%m-%d %H:%M:%S")) or ""
             except Exception as msg:
-                common.log("",  "%s - %s" % (Exception, msg), xbmc.LOGERROR)
+                common.log("",  f"{Exception} - {msg}", xbmc.LOGERROR)
 
             # is the file a video ?
             if extension in ["."+ext.replace(".", "").upper() for ext in common.getaddon_setting("vidsext").split("|")]:
@@ -302,7 +301,7 @@ class Main:
                 liz.setProperty('mypicsdb_person', persons)
                 liz.setInfo(type="pictures", infoLabels=infolabels)
 
-            liz.setLabel(picname+" "+suffix)
+            liz.setLabel(f"{picname} {suffix}")
 
             if fanart is not None and fanart != False:
                 liz.setProperty('fanart_image', fanart)
@@ -319,7 +318,7 @@ class Main:
 
             return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=fullfilepath, listitem=liz, isFolder=False)
         except Exception as msg:
-            common.log("",  "%s - %s" % (Exception, msg), xbmc.LOGERROR)
+            common.log("",  f"{Exception} - {msg}", xbmc.LOGERROR)
 
     def change_view(self):
         view_modes = {
@@ -482,9 +481,9 @@ class Main:
             self.args.value, thisdateformat).tm_mon - 1])
         nameperiode = strftime(dptd, strptime(self.args.value, thisdateformat))
 
-        common.log("", "dptd = " + dptd)
-        common.log("", "nameperiode = " + nameperiode)
-        common.log("", "allperiod = " + allperiod)
+        common.log("", f"dptd = {dptd}")
+        common.log("", f"nameperiode = {nameperiode}")
+        common.log("", f"allperiod = {allperiod}")
 
         count = MPDB.count_pics_in_period(
             allperiod, self.args.value, min_rating)
@@ -509,27 +508,24 @@ class Main:
                                action="showpics",  # action
                                iconimage=join(
                                    PIC_PATH, "folder_date.png"),  # icone
-                               contextmenu=[(common.getstring(30152), "RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")" % (
-                                   sys.argv[0], allperiod, self.args.value)),]
+                               contextmenu=[(common.getstring(
+                                   30152), f"RunPlugin(\"{sys.argv[0]}?action='addfolder'&method='date'&period='{allperiod}'&value='{self.args.value}'&viewmode='scan'\")"),]
                                )
 
         total = len(listperiod)
         for period in listperiod:
             if period:
                 if action == "showpics":
-                    context = [(common.getstring(30152), "RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&page=''&viewmode='scan'\")" % (
-                        sys.argv[0], nextperiod, period))]
+                    context = [(common.getstring(
+                        30152), f"RunPlugin(\"{sys.argv[0]}?action='addfolder'&method='date'&period='{nextperiod}'&value='{period}'&page=''&viewmode='scan'\")")]
                 else:
-                    context = [(common.getstring(30152), "RunPlugin(\"%s?action='addfolder'&method='date'&period='%s'&value='%s'&viewmode='scan'\")" % (
-                        sys.argv[0], self.args.period, period))]
+                    context = [(common.getstring(
+                        30152), f"RunPlugin(\"{sys.argv[0]}?action='addfolder'&method='date'&period='{self.args.period}'&value='{period}'&viewmode='scan'\")")]
 
                 try:
                     dateformat = strptime(period, periodformat)
-                    self.add_directory(name="%s (%s %s)" % (strftime(self.prettydate(displaydate, dateformat), dateformat),
-                                                            MPDB.count_pics_in_period(
-                        self.args.period, period, min_rating),
-                        # libellé
-                        common.getstring(30050)),
+                    self.add_directory(name=f"{strftime(self.prettydate(displaydate, dateformat), dateformat)} ({MPDB.count_pics_in_period(
+                        self.args.period, period, min_rating)} {common.getstring(30050)})",
                         params=[("method", "date"), ("period", nextperiod),
                                 # paramètres
                                 ("value", period), ("viewmode", "view")],
@@ -560,21 +556,21 @@ class Main:
 
         # show the folders
         for idchildren, childrenfolder in childrenfolders:
-            common.log("Main.show_folders", "children folder = %s" %
-                       childrenfolder)
+            common.log("Main.show_folders",
+                       f"children folder = {childrenfolder}")
             path = MPDB.cur.request_with_binds(
                 "SELECT FullPath FROM Folders WHERE idFolder = ?", (idchildren,))[0][0]
             count = MPDB.count_pics_in_folder(idchildren, min_rating)
             if count > 0:
-                self.add_directory(name="%s (%s %s)" % (childrenfolder, count, common.getstring(30050)),  # libellé
+                self.add_directory(name=f"{childrenfolder} ({count} {common.getstring(30050)})",  # libellé
                                    params=[("method", "folders"), ("folderid", str(
                                        # paramètres
                                        idchildren)), ("onlypics", "non"), ("viewmode", "view")],
                                    action="showfolder",  # action
                                    iconimage=join(
                                        PIC_PATH, "folder_pictures.png"),  # icone
-                                   contextmenu=[(common.getstring(30212), "Container.Update(\"%s?action='rootfolders'&do='addrootfolder'&addpath='%s'&exclude='1'&viewmode='view'\",)" % (
-                                       sys.argv[0], common.quote_param(path))),],
+                                   contextmenu=[(common.getstring(
+                                       30212), f"Container.Update(\"{sys.argv[0]}?action='rootfolders'&do='addrootfolder'&addpath='{common.quote_param(path)}'&exclude='1'&viewmode='view'\",)"),],
                                    # nb total d'éléments
                                    total=len(childrenfolders))
 
@@ -593,7 +589,7 @@ class Main:
 
             count = count + 1
             common.log("Main.show_folders",
-                       "pic's path = %s  pic's name = %s" % (path, filename))
+                       f"pic's path = {path}  pic's name = {filename}")
 
             context = []
             # context.append( (common.getstring(30303),"SlideShow(%s%s,recursive,notrandom)"%(sys.argv[0],sys.argv[2]) ) )
