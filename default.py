@@ -268,7 +268,7 @@ class Main:
                                   suffix, "date": date, "count": count}
 
                 try:
-                    if exiftime != None and exiftime != "0":
+                    if exiftime is not None and exiftime != "0":
                         #common.log("Main.add_picture",
                                    #"Picture has EXIF Date/Time %s" % exiftime)
                         infolabels["exif:exiftime"] = exiftime
@@ -303,7 +303,7 @@ class Main:
 
             liz.setLabel(f"{picname} {suffix}")
 
-            if fanart is not None and fanart != False:
+            if fanart is not None and fanart:
                 liz.setProperty('fanart_image', fanart)
 
             # if contextmenu:
