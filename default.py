@@ -222,7 +222,7 @@ class Main:
         extension = splitext(picname)[1].upper()
         try:
             fullfilepath = join(picpath, picname)
-            common.log("Main.add_picture", "Name = %s" % fullfilepath)
+            #common.log("Main.add_picture", f"Name = {fullfilepath}")
 
             liz = xbmcgui.ListItem(picname, info)
 
@@ -269,8 +269,8 @@ class Main:
 
                 try:
                     if exiftime != None and exiftime != "0":
-                        common.log("Main.add_picture",
-                                   "Picture has EXIF Date/Time %s" % exiftime)
+                        #common.log("Main.add_picture",
+                                   #"Picture has EXIF Date/Time %s" % exiftime)
                         infolabels["exif:exiftime"] = exiftime
                 except:
                     pass
@@ -285,8 +285,8 @@ class Main:
                         resolutionY = resolutionXY[0][0]
 
                     if resolutionX != None and resolutionY != None and resolutionX != "0" and resolutionY != "0":
-                        common.log("Main.add_picture", "Picture has resolution %s x %s" % (
-                            str(resolutionX), str(resolutionY)))
+                        #common.log("Main.add_picture", "Picture has resolution %s x %s" % (
+                            #str(resolutionX), str(resolutionY)))
                         infolabels["exif:resolution"] = str(
                             resolutionX) + ',' + str(resolutionY)
                 except:
