@@ -534,8 +534,7 @@ class Main:
 
                 try:
                     dateformat = strptime(period, periodformat)
-                    self.add_directory(name=f"{strftime(self.prettydate(displaydate, dateformat), dateformat)} ({MPDB.count_pics_in_period(
-                        self.args.period, period, min_rating)} {common.getstring(30050)})",
+                    self.add_directory(name=f"{strftime(self.prettydate(displaydate, dateformat), dateformat)} ({MPDB.count_pics_in_period(self.args.period, period, min_rating)} {common.getstring(30050)})",
                         params=[("method", "date"), ("period", nextperiod),
                                 # paramètres
                                 ("value", period), ("viewmode", "view")],
